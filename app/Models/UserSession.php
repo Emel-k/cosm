@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class UserSession extends Model
@@ -34,6 +35,7 @@ class UserSession extends Model
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
     ];
+    private \Illuminate\Support\Carbon $expires_at;
 
     /**
      * RELATIONS
@@ -43,7 +45,7 @@ class UserSession extends Model
      * Relation One-to-Many avec UserResponse
      * Une session peut avoir plusieurs réponses
      */
-    public function userResponses()
+    public function userResponses(): \Illuminate\Database\Eloquent\Relations\HasMany
     {
         return $this->hasMany(UserResponse::class, 'session_id');
     }
@@ -52,7 +54,7 @@ class UserSession extends Model
      * Relation One-to-Many avec Assessment
      * Une session peut générer plusieurs évaluations
      */
-    public function assessments()
+    public function assessments(): \Illuminate\Database\Eloquent\Relations\HasMany
     {
         return $this->hasMany(Assessment::class, 'session_id');
     }
@@ -84,7 +86,7 @@ class UserSession extends Model
     /**
      * Vérifie si la session est expirée
      */
-    public function isExpired()
+    public function isExpired(): bool
     {
         return $this->expires_at->isPast();
     }
@@ -92,7 +94,7 @@ class UserSession extends Model
     /**
      * Prolonge la session
      */
-    public function extend($hours = 24)
+    public function extend($hours = 24): void
     {
         $this->expires_at = now()->addHours($hours);
         $this->save();
